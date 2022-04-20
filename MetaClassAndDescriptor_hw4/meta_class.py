@@ -11,11 +11,12 @@ class CustomMeta(type):
     def __new__(cls, name, bases, dct):
         res_dict = {}
         for atr_name, atr_value in dct.items():
-            if not atr_name.startswith('__'):
+            if not (atr_name.startswith('__') and atr_name.endswith("__")):
                 res_dict["custom_" + atr_name] = atr_value
             else:
                 res_dict[atr_name] = atr_value
         res_dict["__setattr__"] = cls.__setattr__
+        print(res_dict)
         return super().__new__(cls, name, bases, res_dict)
 
     def __setattr__(cls, key, value):
@@ -26,7 +27,7 @@ class CustomMeta(type):
 class CustomClass(metaclass=CustomMeta):
     """Класс для проверки работы метакласса"""
     x = 50
-
+    buf__ = 2
     def __init__(self, val=99):
         """Переопределение метода __init__"""
         self.val = val
@@ -42,6 +43,7 @@ class CustomClass(metaclass=CustomMeta):
 
 if __name__ == "__main__":
     # inst = CustomClass()
+    # print(inst.__dir__())
     # inst.custom_x
     # inst.custom_val
     # inst.custom_get_val()
