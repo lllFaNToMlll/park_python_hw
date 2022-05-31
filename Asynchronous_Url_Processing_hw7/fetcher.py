@@ -6,20 +6,24 @@ import aiohttp
 import aiofiles
 
 
+async def read_url(url, client):
+    async with client.get(url) as resp:
+        data = await resp.read()
+        print(f'{url} содержит {len(data)} символов')
+
+
 async def parse_urls(client, url_queue, queue_task):
     """Парсинг url"""
     while True:
         url = await url_queue.get()
         try:
-            async with client.get(url) as resp:
-                data = await resp.read()
-                print(f'{url} содержит {len(data)} символов')
+            await read_url(url, client)
         except Exception as message:
             print(f'Ошибка: {message}')
         finally:
             url_queue.task_done()
         if queue_task.done() and url_queue.empty():
-            break
+            return True
 
 
 async def full_queue(url_queue, file_name):
@@ -55,7 +59,6 @@ def create_parser():
                           '--file_name',
                           default='urls.txt')
     return arg_conf
-
 
 if __name__ == '__main__':
     arg_config = create_parser()
